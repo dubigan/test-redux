@@ -14,7 +14,7 @@ import {
 import { getErrors, redirect } from '../lib/utils/utils';
 import api from '../../pages/api/api';
 import { useAlerts } from '../lib/alert/AlertContext';
-import useItemStore from '../../store/mobx/useItemStore';
+import useItemStore from '../../store/redux/useItemStore';
 
 export const useItemFunctions = <T extends TBaseItem>(itemType: TItemType): TItemFunctions<T> => {
     const context = useAlerts();

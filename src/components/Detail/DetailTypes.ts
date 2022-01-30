@@ -118,10 +118,10 @@ export type TItemsProps<T> = {
 export type TSetItem<T> = (item: T) => void;
 
 export type TItemFunctions<T> = {
-    item: T;
+    item: T | null;
     loadItem: () => void;
     saveItem: (back?: boolean) => void;
-    changeItem : (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void
+    changeItem: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
     changeItemData: <K extends keyof T>(name: string, value: any) => void;
     changeGender: (e: ChangeEvent<HTMLInputElement>) => void;
 };

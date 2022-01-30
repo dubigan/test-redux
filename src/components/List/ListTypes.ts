@@ -44,14 +44,14 @@ export type TListOfItemsProps<TItem> = {
 
 export type TLoadItemsProps = {
     url: string;
-    sortedBy: TSortedBy;
+    // sortedBy: TSortedBy;
     owner?: number;
 };
 
 export type TDeleteItemProps = {
     url: string;
-    item_pk : number;
+    item_pk: number;
     owner_pk: number;
-}
+};
 
 export type TListType = E_LIST;

@@ -16,10 +16,8 @@ import { TextArea } from '../../components/lib/input/TextArea';
 import api from '../api/api';
 import { useRouter } from 'next/router';
 import { useAlerts } from '../../components/lib/alert/AlertContext';
-import { observer } from 'mobx-react-lite';
-import useItemStore from '../../store/mobx/useItemStore';
 
-const OwnerDetail = observer(() => {
+const OwnerDetail = () => {
     const history = useRouter();
     const context = useAlerts();
 
@@ -29,7 +27,7 @@ const OwnerDetail = observer(() => {
 
     const btnNewCarClick = async () => {
         if (!item) return;
-        sessionStorage.setItem(E_ITEM_KEY.OWNER, item!.id.toString());
+        sessionStorage.setItem(E_ITEM_KEY.OWNER, item?.id.toString());
         sessionStorage.removeItem(E_ITEM_KEY.CAR);
         try {
             const res = await api.queryServer(OWNER_URL_API, {
@@ -86,7 +84,7 @@ const OwnerDetail = observer(() => {
                                     value={item?.last_name ?? ''}
                                     onChange={changeItem}
                                 />
-                                <GenderSelect name="gender" checkValue={item!.gender} onChange={changeGender} />
+                                <GenderSelect name="gender" checkValue={item?.gender ?? ''} onChange={changeGender} />
                                 <TextField
                                     name="age"
                                     maxLength={3}
@@ -99,7 +97,7 @@ const OwnerDetail = observer(() => {
                             <Form.Group className="form__group form__group_owner-comment">
                                 <TextArea
                                     rows={14}
-                                    value={item.comment ?? ''}
+                                    value={item?.comment ?? ''}
                                     name="comment"
                                     placeholder="Комментарий"
                                     onChange={changeItem}
@@ -127,7 +125,7 @@ const OwnerDetail = observer(() => {
                             className="btn-primary btn-primary_owner-add-car tooltip"
                             name="add_car"
                             onClick={btnNewCarClick}
-                            disabled={item!.id < 0}
+                            disabled={(item?.id ?? -1) < 0}
                         >
                             <TooltipContent>Добавить&nbsp;автомобиль</TooltipContent>
                             Добавить автомобиль
@@ -140,6 +138,6 @@ const OwnerDetail = observer(() => {
             </Card>
         </div>
     );
-});
+};
 
 export default OwnerDetail;

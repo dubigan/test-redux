@@ -7,16 +7,15 @@ import { Row } from '../../components/lib/Row/Row';
 import { Button } from '../../components/lib/Button/Button';
 import Form from '../../components/lib/Form/Form';
 import { TooltipContent } from '../../components/lib/Tooltip';
-import {E_CAR_ITEM, E_DETAIL, TCarItem, TItemInfo, TItemsProps, TOwnerItem} from '../../components/Detail/DetailTypes';
+import { E_CAR_ITEM, E_DETAIL, TCarItem } from '../../components/Detail/DetailTypes';
 import { digitsOnly } from '../../components/lib/utils/utils';
-import { observer } from 'mobx-react-lite';
 
-const CarDetail = observer(() => {
-    const {loadItem, saveItem, changeItem, changeItemData, item} = useItemFunctions<TCarItem>(E_DETAIL.CAR)
+const CarDetail = () => {
+    const { loadItem, saveItem, changeItem, changeItemData, item } = useItemFunctions<TCarItem>(E_DETAIL.CAR);
 
     const saveItemWithBack = () => {
         return () => saveItem(true);
-    }
+    };
 
     const changeDate = (date: Date | Date[]) => {
         //console.log("changeDate", date.toLocaleDateString("ru"));
@@ -144,6 +143,6 @@ const CarDetail = observer(() => {
             </Card>
         </div>
     );
-});
+};
 
 export default CarDetail;

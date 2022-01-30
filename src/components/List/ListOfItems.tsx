@@ -6,19 +6,16 @@ import { Button } from '../lib/Button/Button';
 import Alerts from '../lib/alert/Alerts';
 import { useAlerts } from '../lib/alert/AlertContext';
 import Loader from '../Loader/Loader';
-import api from '../../pages/api/api';
-import { getErrors } from '../lib/utils/utils';
 import { E_DIRECTION, TSortedBy } from './ListTypes';
 import DeleteDialog from '../DeleteDialog/DeleteDialog';
 import { TListOfItemsProps } from './ListTypes';
 import { TBaseItem } from '../Detail/DetailTypes';
-import { observer } from 'mobx-react-lite';
 // import Loading from '../../store/Loading';
-import useListStore from '../../store/mobx/useListStore';
 import { CAR_URL_API } from '../Detail/useItemInfo';
-import useLoading from '../../store/mobx/useLoading';
+import useLoading from '../../store/redux/useLoading';
+import useListStore from '../../store/redux/useListStore';
 
-const ListOfItems = observer(<TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) => {
+const ListOfItems = <TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) => {
     const context = useAlerts();
     const listStore = useListStore<TItem>();
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -34,7 +31,7 @@ const ListOfItems = observer(<TItem extends TBaseItem>(props: TListOfItemsProps<
             loading.loading = true;
             //console.log('getItems owner', this.props.owner);
             try {
-                await listStore.loadItems({ url: props.functions!.url, sortedBy, owner: props.owner ?? -1 });
+                await listStore.loadItems({ url: props.functions!.url, owner: props.owner ?? -1 });
             } catch (e: any) {
                 context.setAlerts(e);
             } finally {
@@ -169,6 +166,6 @@ const ListOfItems = observer(<TItem extends TBaseItem>(props: TListOfItemsProps<
             )}
         </div>
     );
-});
+};
 
 export default ListOfItems;
