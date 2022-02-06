@@ -1,25 +1,17 @@
 import { ChangeEvent, useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 // import { AlertContext } from "../lib/alert/AlertContext";
-import {
-    TBaseItem,
-    TItemsProps,
-    TItemFunctions,
-    TOwnerItem,
-    E_DETAIL,
-    TItemType,
-    TGender,
-    E_GENDER,
-} from './DetailTypes';
 import { getErrors, redirect } from '../lib/utils/utils';
 import api from '../../pages/api/api';
 import { useAlerts } from '../lib/alert/AlertContext';
 import useItemStore from '../../store/redux/useItemStore';
+import { E_GENDER, TBaseItem, TGender, TItemFunctions, TItemType } from '../types/types';
+import useItemInfo from './useItemInfo';
 
-export const useItemFunctions = <T extends TBaseItem>(itemType: TItemType): TItemFunctions<T> => {
+export const useItemFunctions = (itemType: TItemType): TItemFunctions => {
     const context = useAlerts();
     const history = useRouter();
-    const itemStore = useItemStore<T>(itemType);
+    const itemStore = useItemStore(itemType);
 
     const stringToGender = (value: string): TGender => {
         if (value.startsWith(E_GENDER.FEMALE)) return E_GENDER.FEMALE;

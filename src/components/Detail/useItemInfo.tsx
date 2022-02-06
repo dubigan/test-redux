@@ -1,16 +1,19 @@
 import {
-    TCarItem,
-    TOwnerItem,
-    TItemsInfo,
-    E_GENDER,
-    E_DETAIL,
     E_BASE_ITEM,
     E_CAR_ITEM,
+    E_DIRECTION,
+    E_GENDER,
+    E_ITEM,
     E_OWNER_ITEM,
-    TBaseItem,
-    E_ITEM_KEY,
+    TCarItem,
+    TItem,
+    TItemsInfo,
     TItemType,
-} from './DetailTypes';
+    TOwnerItem,
+    TSortedBy,
+} from '../types/types';
+import getCarsTable from '../List/carsTable';
+import getOwnersTable from '../List/ownersTable';
 
 export const EMPTY_CAR_ID = -1;
 export const EMPTY_CAR: TCarItem = {
@@ -42,47 +45,78 @@ export const EMPTY_OWNER: TOwnerItem = {
 };
 
 export const CAR_URL_API = '/api/car/';
+export const CARS_URL_API = '/api/cars/';
 export const CAR_API_KEY = 'car_pk';
 export const OWNER_URL_API = '/api/owner/';
+export const OWNERS_URL_API = '/api/owners/';
 export const OWNER_API_KEY = 'owner_pk';
 
-const functions: TItemsInfo = {
-    [E_DETAIL.CAR]: {
-        url: CAR_URL_API,
-        // detailUrl: "/car",
+const itemsInfo: TItemsInfo = {
+    [E_ITEM.CAR]: {
+        item_api_url: CAR_URL_API,
+        list_api_url: CARS_URL_API,
+        detailUrl: '/car',
         idKey: CAR_API_KEY,
         tooltipPlace: 'bottom',
+        nameOfItem: 'Автомобиль',
+        addButton: false,
+
+        itemInfo: (item: TItem) => [(item as TCarItem).manufacturer, (item as TCarItem).model].join(' '),
+        getTable: getCarsTable,
+
+        getDefaultSortedBy: () =>
+            ({
+                name: 'model',
+                direction: E_DIRECTION.ASC,
+            } as TSortedBy),
 
         getNewItemId: (): number => EMPTY_CAR_ID,
         getNewItem: () => {
             return EMPTY_CAR;
         },
-        verifyItem: (item: TCarItem) => {
+        verifyItem: (item: TItem) => {
             // if (item.id < 0) return null;
-            item.power = item.power ?? 0;
-            item.mileage = item.mileage ?? 0;
+            const it = item as TCarItem;
+            it.power = it.power ?? 0;
+            it.mileage = it.mileage ?? 0;
             return item;
         },
     },
-    [E_DETAIL.OWNER]: {
-        url: OWNER_URL_API,
-        // detailUrl: "/owner",
+    [E_ITEM.OWNER]: {
+        item_api_url: OWNER_URL_API,
+        list_api_url: OWNERS_URL_API,
+        detailUrl: '/owner',
         idKey: OWNER_API_KEY,
         tooltipPlace: 'bottom',
+        nameOfItem: 'Автовладелец',
+        addButton: true,
+
+        itemInfo: (item: TItem) => {
+            const it = item as TOwnerItem;
+            return [it.last_name, it.name, it.patronymic].join(' ');
+        },
+        getTable: getOwnersTable,
+
+        getDefaultSortedBy: () =>
+            ({
+                name: 'last_name',
+                direction: E_DIRECTION.ASC,
+            } as TSortedBy),
 
         getNewItemId: (): number => EMPTY_OWNER_ID,
         getNewItem: () => {
             return EMPTY_OWNER;
         },
-        verifyItem: (item: TOwnerItem) => {
-            item.age = item.age ?? 0;
+        verifyItem: (item: TItem) => {
+            const it = item as TOwnerItem;
+            it.age = it.age ?? 0;
             return item;
         },
     },
 };
 
 const useItemInfo = (detailType: TItemType) => {
-    return functions[detailType];
+    return itemsInfo[detailType];
 };
 
 export default useItemInfo;

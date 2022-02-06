@@ -1,11 +1,6 @@
 import React from 'react';
 import ListOfItems from '../../components/List/ListOfItems';
-import { TListOfItemsProps, TItemFunctions, E_LIST } from '../../components/List/ListTypes';
-import { TCarItem } from '../../components/Detail/DetailTypes';
-import { useListFunctions } from '../../components/List/useListFunctions';
-import Header from '../../components/Header/Header';
-import { GetServerSideProps } from 'next';
-import api from '../../pages/api/api';
+import { E_ITEM_LIST, TListOfItemsProps } from '../../components/types/types';
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 //   const { req } = context;
@@ -15,17 +10,10 @@ import api from '../../pages/api/api';
 //   return { props: {} };
 // };
 
-const Cars = (props: TListOfItemsProps<TCarItem>) => {
-    const functions = useListFunctions(E_LIST.CARS);
-    // console.log('Cars.owner', props.owner);
-
+const Cars = (props: TListOfItemsProps) => {
     return (
         <>
-            <ListOfItems<TCarItem>
-                owner={props.owner}
-                withAlerts={props.withAlerts}
-                functions={functions as TItemFunctions<TCarItem>}
-            />
+            <ListOfItems listType={E_ITEM_LIST.CARS} owner={props.owner} withAlerts={props.withAlerts} />
         </>
     );
 };

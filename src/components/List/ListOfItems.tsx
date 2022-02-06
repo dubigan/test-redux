@@ -4,48 +4,31 @@ import { Row } from '../lib/Row/Row';
 import { TooltipContent } from '../lib/Tooltip';
 import { Button } from '../lib/Button/Button';
 import Alerts from '../lib/alert/Alerts';
-import { useAlerts } from '../lib/alert/AlertContext';
 import Loader from '../Loader/Loader';
-import { E_DIRECTION, TSortedBy } from './ListTypes';
 import DeleteDialog from '../DeleteDialog/DeleteDialog';
-import { TListOfItemsProps } from './ListTypes';
-import { TBaseItem } from '../Detail/DetailTypes';
-// import Loading from '../../store/Loading';
-import { CAR_URL_API } from '../Detail/useItemInfo';
-import useLoading from '../../store/redux/useLoading';
 import useListStore from '../../store/redux/useListStore';
+import { E_DIRECTION, itemIdType, itemType, TItem, TListOfItemsProps, TSortedBy } from '../types/types';
+import useItemInfo from '../Detail/useItemInfo';
+import useItemIdStore from '../../store/redux/useItemIdStore';
 
-const ListOfItems = <TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) => {
-    const context = useAlerts();
-    const listStore = useListStore<TItem>();
+const ListOfItems = (props: TListOfItemsProps) => {
+    const { loadItems, deleteItem, list, loading } = useListStore(props.listType);
+    // console.log('ListOfItems loading', loading);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<TItem | undefined>(undefined);
-    const [sortedBy, setSortedBy] = useState<TSortedBy>(props.functions!.getDefaultSortedBy());
+    const itemInfo = useItemInfo(itemType(props.listType));
+    const [sortedBy, setSortedBy] = useState<TSortedBy>(itemInfo!.getDefaultSortedBy());
     // const [loading, setLoading] = useState(false);
     const history = useRouter();
-    const loading = useLoading();
+    const { setItemPk } = useItemIdStore(itemIdType(props.listType));
     // console.log('ListOfItems props', props);
 
     useEffect(() => {
-        const loadItems = async () => {
-            loading.loading = true;
-            //console.log('getItems owner', this.props.owner);
-            try {
-                await listStore.loadItems({ url: props.functions!.url, owner: props.owner ?? -1 });
-            } catch (e: any) {
-                context.setAlerts(e);
-            } finally {
-                // setLoading(false);
-                loading.loading = false;
-            }
-        };
-        loadItems();
-        // console.log('ListOfItems.getItems items', itemsStore.items);
-    }, [listStore, sortedBy, props.owner]);
+        loadItems({ url: itemInfo!.list_api_url, owner: props.owner ?? -1 });
+        // console.log('ListOfItems.loadItems list', list);
+    }, [props.owner, props.listType]);
 
-    const getItemById = (id: number) => {
-        return listStore.list.filter((item: any) => +item.id === +id)[0];
-    };
+    const getItemById = (id: number) => list.find((item) => item.id === id);
 
     const btnSortClick = (e: MouseEvent<HTMLElement>) => {
         const sorted_name = (e.target as HTMLElement).id;
@@ -74,8 +57,8 @@ const ListOfItems = <TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) =
     };
 
     const btnAddClick = async (e: MouseEvent<HTMLElement>) => {
-        sessionStorage.removeItem(props.functions!.idKey);
-        history.push(props.functions!.detailUrl);
+        setItemPk(-1);
+        history.push(itemInfo!.detailUrl);
         // try {
         //     const res = await api.queryServer(props.functions.url, { btn_add: "" });
         //     redirect(history, res.data.redirect);
@@ -85,37 +68,24 @@ const ListOfItems = <TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) =
     };
 
     const btnEditClick = (e: MouseEvent<HTMLButtonElement>) => {
-        const item_pk = (e.target as HTMLButtonElement).value;
+        const item_pk = +(e.target as HTMLButtonElement).value;
 
-        sessionStorage.setItem(props.functions!.idKey, item_pk);
-        history.push(props.functions!.detailUrl);
+        setItemPk(item_pk);
+        history.push(itemInfo!.detailUrl);
     };
 
     const getItemId = (item: TItem | undefined): number => (item ? item.id : -1);
 
-    const deleteItem = async (confirm: string) => {
+    const delItem = (confirm: string) => {
         setShowDeleteDialog(false);
 
         if (confirm === 'true') {
-            // setLoading(true);
-            loading.loading = true;
-            try {
-                const res = await listStore.deleteItem({
-                    url: props.functions!.url,
-                    item_pk: getItemId(itemToDelete),
-                    owner_pk: props.owner ?? -1,
-                });
-                // setItems(res.data);
-                context.setAlerts({
-                    type: 'success',
-                    message: `${props.functions!.nameOfItem} успешно удален`,
-                });
-            } catch (e: any) {
-                context.setAlerts(e);
-            } finally {
-                // setLoading(false);
-                loading.loading = false;
-            }
+            deleteItem({
+                url: itemInfo!.list_api_url,
+                item_pk: getItemId(itemToDelete),
+                owner_pk: props.owner ?? -1,
+                listType: props.listType,
+            });
         }
     };
 
@@ -135,7 +105,7 @@ const ListOfItems = <TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) =
     };
 
     const getAddButton = () => {
-        if (props.functions!.addButton)
+        if (itemInfo!.addButton)
             return (
                 <Button variant="primary" className="btn-primary btn-primary_add tooltip" onClick={btnAddClick}>
                     <TooltipContent>Добавление&nbsp;нового&nbsp;автовладельца</TooltipContent>+
@@ -149,18 +119,18 @@ const ListOfItems = <TItem extends TBaseItem>(props: TListOfItemsProps<TItem>) =
             <Alerts withAlerts={props.withAlerts ?? true} />
             {showDeleteDialog && (
                 <DeleteDialog
-                    nameOfItem={props.functions!.nameOfItem}
+                    nameOfItem={itemInfo!.nameOfItem}
                     itemToDelete={itemToDelete!}
-                    deleteItem={deleteItem}
-                    itemInfo={props.functions!.itemInfo}
+                    deleteItem={delItem}
+                    itemInfo={itemInfo!.itemInfo}
                     onClose={() => setShowDeleteDialog(false)}
                 />
             )}
-            {loading.loading ? (
+            {loading ? (
                 <Loader />
             ) : (
                 <>
-                    {props.functions!.getTable(listStore.list, getButtons, btnSortClick, sortedBy)}
+                    {itemInfo!.getTable(list, getButtons, btnSortClick, sortedBy)}
                     {getAddButton()}
                 </>
             )}

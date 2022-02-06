@@ -7,11 +7,12 @@ import { Row } from '../../components/lib/Row/Row';
 import { Button } from '../../components/lib/Button/Button';
 import Form from '../../components/lib/Form/Form';
 import { TooltipContent } from '../../components/lib/Tooltip';
-import { E_CAR_ITEM, E_DETAIL, TCarItem } from '../../components/Detail/DetailTypes';
 import { digitsOnly } from '../../components/lib/utils/utils';
+import { E_CAR_ITEM, E_ITEM, TCarItem } from '../../components/types/types';
 
 const CarDetail = () => {
-    const { loadItem, saveItem, changeItem, changeItemData, item } = useItemFunctions<TCarItem>(E_DETAIL.CAR);
+    const { loadItem, saveItem, changeItem, changeItemData, item } = useItemFunctions(E_ITEM.CAR);
+    const carItem = item as TCarItem;
 
     const saveItemWithBack = () => {
         return () => saveItem(true);
@@ -24,8 +25,8 @@ const CarDetail = () => {
     };
 
     const getDate = () => {
-        if (item?.production) {
-            const [day, month, year] = item!.production.split('.');
+        if (carItem?.production) {
+            const [day, month, year] = carItem!.production.split('.');
             //console.log("getDate", [day, month, year]);
             return new Date(+year, +month - 1, +day);
         }
@@ -51,7 +52,7 @@ const CarDetail = () => {
                                         className="form__control form__control_car-input"
                                         name="manufacturer"
                                         type="text"
-                                        value={item?.manufacturer ?? ''}
+                                        value={carItem?.manufacturer ?? ''}
                                         onChange={changeItem}
                                     />
                                 </Form.Group>
@@ -61,7 +62,7 @@ const CarDetail = () => {
                                         className="form__control form__control_car-input"
                                         name="model"
                                         type="text"
-                                        value={item?.model ?? ''}
+                                        value={carItem?.model ?? ''}
                                         onChange={changeItem}
                                     />
                                 </Form.Group>
@@ -89,7 +90,7 @@ const CarDetail = () => {
                                         className="form__control form__control_car-input"
                                         name="color"
                                         type="text"
-                                        value={item?.color ?? ''}
+                                        value={carItem?.color ?? ''}
                                         onChange={changeItem}
                                     />
                                 </Form.Group>
@@ -102,7 +103,7 @@ const CarDetail = () => {
                                         name="power"
                                         type="text"
                                         maxLength={3}
-                                        value={item?.power ?? ''}
+                                        value={carItem?.power ?? ''}
                                         onChange={changeItem}
                                         onKeyPress={digitsOnly}
                                     />
@@ -116,7 +117,7 @@ const CarDetail = () => {
                                         name="mileage"
                                         type="text"
                                         maxLength={10}
-                                        value={item?.mileage ?? ''}
+                                        value={carItem?.mileage ?? ''}
                                         onChange={changeItem}
                                         onKeyPress={digitsOnly}
                                     />

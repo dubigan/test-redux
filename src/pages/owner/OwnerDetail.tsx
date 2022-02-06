@@ -8,29 +8,42 @@ import { Button } from '../../components/lib/Button/Button';
 import Form from '../../components/lib/Form/Form';
 import GenderSelect from '../../components/lib/GenderSelect/GenderSelect';
 import { TooltipContent } from '../../components/lib/Tooltip';
-import { E_DETAIL, E_GENDER, E_ITEM_KEY, TGender, TOwnerItem } from '../../components/Detail/DetailTypes';
-import { OWNER_URL_API } from '../../components/Detail/useItemInfo';
-import { digitsOnly, getErrors, redirect } from '../../components/lib/utils/utils';
+import useItemInfo, { EMPTY_CAR_ID } from '../../components/Detail/useItemInfo';
+import { digitsOnly, redirect } from '../../components/lib/utils/utils';
 import { TextField } from '../../components/lib/input/TextField';
 import { TextArea } from '../../components/lib/input/TextArea';
 import api from '../api/api';
 import { useRouter } from 'next/router';
 import { useAlerts } from '../../components/lib/alert/AlertContext';
+import {
+    E_GENDER,
+    E_ITEM,
+    E_ITEM_ID,
+    E_ITEM_KEY,
+    E_ITEM_LIST,
+    TGender,
+    TOwnerItem,
+} from '../../components/types/types';
+import useItemIdStore from '../../store/redux/useItemIdStore';
 
 const OwnerDetail = () => {
     const history = useRouter();
     const context = useAlerts();
 
-    const { loadItem, saveItem, changeItem, changeItemData, item } = useItemFunctions<TOwnerItem>(E_DETAIL.OWNER);
+    const { loadItem, saveItem, changeItem, changeItemData, item } = useItemFunctions(E_ITEM.OWNER);
+    const owner = item as TOwnerItem;
+    const { setItemPk: setOwnerPk } = useItemIdStore(E_ITEM_ID.OWNER);
+    const { setItemPk: setCarPk } = useItemIdStore(E_ITEM_ID.CAR);
+    const itemInfo = useItemInfo(E_ITEM.OWNER);
 
     const saveItemWithoutBack = () => () => saveItem(false);
 
     const btnNewCarClick = async () => {
-        if (!item) return;
-        sessionStorage.setItem(E_ITEM_KEY.OWNER, item?.id.toString());
-        sessionStorage.removeItem(E_ITEM_KEY.CAR);
+        if (!owner) return;
+        setOwnerPk(owner.id);
+        setCarPk(EMPTY_CAR_ID);
         try {
-            const res = await api.queryServer(OWNER_URL_API, {
+            const res = await api.queryServer(itemInfo.item_api_url, {
                 btn_add: '',
                 // url: window.location.pathname,
                 // owner_pk: item!.id,
@@ -67,13 +80,13 @@ const OwnerDetail = () => {
                                 <TextField
                                     select={false}
                                     name="name"
-                                    value={item?.name ?? ''}
+                                    value={owner?.name ?? ''}
                                     placeholder="Имя"
                                     onChange={changeItem}
                                 />
                                 <TextField
                                     name="patronymic"
-                                    value={item?.patronymic ?? ''}
+                                    value={owner?.patronymic ?? ''}
                                     placeholder="Отчество"
                                     onChange={changeItem}
                                 />
@@ -81,15 +94,15 @@ const OwnerDetail = () => {
                                     name="last_name"
                                     type="text"
                                     placeholder="Фамилия"
-                                    value={item?.last_name ?? ''}
+                                    value={owner?.last_name ?? ''}
                                     onChange={changeItem}
                                 />
-                                <GenderSelect name="gender" checkValue={item?.gender ?? ''} onChange={changeGender} />
+                                <GenderSelect name="gender" checkValue={owner?.gender ?? ''} onChange={changeGender} />
                                 <TextField
                                     name="age"
                                     maxLength={3}
                                     placeholder="Возраст"
-                                    value={item?.age ?? ''}
+                                    value={owner?.age ?? ''}
                                     onChange={changeItem}
                                     onKeyPress={digitsOnly}
                                 />
@@ -97,7 +110,7 @@ const OwnerDetail = () => {
                             <Form.Group className="form__group form__group_owner-comment">
                                 <TextArea
                                     rows={14}
-                                    value={item?.comment ?? ''}
+                                    value={owner?.comment ?? ''}
                                     name="comment"
                                     placeholder="Комментарий"
                                     onChange={changeItem}
@@ -125,7 +138,7 @@ const OwnerDetail = () => {
                             className="btn-primary btn-primary_owner-add-car tooltip"
                             name="add_car"
                             onClick={btnNewCarClick}
-                            disabled={(item?.id ?? -1) < 0}
+                            disabled={(owner?.id ?? -1) < 0}
                         >
                             <TooltipContent>Добавить&nbsp;автомобиль</TooltipContent>
                             Добавить автомобиль
@@ -133,7 +146,7 @@ const OwnerDetail = () => {
                     </Row>
                 </Card.Header>
                 <Card.Body>
-                    <Cars withAlerts={false} owner={item?.id} />
+                    <Cars withAlerts={false} owner={item?.id} listType={E_ITEM_LIST.CARS} />
                 </Card.Body>
             </Card>
         </div>
